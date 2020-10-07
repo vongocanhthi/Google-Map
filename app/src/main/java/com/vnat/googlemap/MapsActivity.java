@@ -90,7 +90,12 @@ public class MapsActivity extends FragmentActivity implements
         edtSearchAddress.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS);
+                List<Place.Field> fields = Arrays.asList(
+                        Place.Field.ID,
+                        Place.Field.LAT_LNG,
+                        Place.Field.NAME,
+                        Place.Field.ADDRESS
+                );
 
                 // Start the autocomplete intent.
                 Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fields)
@@ -125,6 +130,10 @@ public class MapsActivity extends FragmentActivity implements
         }
         mMap.setMyLocationEnabled(true);
 
+        if (location.hasLocationEnabled()) {
+            myLocation();
+        }
+
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
@@ -145,19 +154,16 @@ public class MapsActivity extends FragmentActivity implements
 
                 try {
                     Geocoder geocoder;
-                    
+
                     List<Address> addresses;
                     geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 
                     addresses = geocoder.getFromLocation(currentCenter.latitude, currentCenter.longitude, 1);
 
-                    if (addresses.size() > 0){
+                    if (addresses.size() > 0) {
                         String address = addresses.get(0).getAddressLine(0);
                         txtAddress.setText(address);
-                        Log.d("zzz", "\n" + address);
                     }
-
-
 
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -195,6 +201,10 @@ public class MapsActivity extends FragmentActivity implements
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 edtSearchAddress.setText(place.getName());
                 txtAddress.setText(place.getAddress());
+
+                Log.i("zzz", "\n" + place.getLatLng());
+//                LatLng currentLocation = new LatLng(place.getLatLng().latitude, place.getLatLng().longitude);
+                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(place.getLatLng(), 15));
 
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
