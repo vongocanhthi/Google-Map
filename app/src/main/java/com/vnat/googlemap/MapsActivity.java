@@ -22,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -46,7 +47,7 @@ import pub.devrel.easypermissions.AppSettingsDialog;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class MapsActivity extends FragmentActivity implements
-        OnMapReadyCallback{
+        OnMapReadyCallback {
 
     @BindView(R.id.txtAddress)
     TextView txtAddress;
@@ -124,48 +125,50 @@ public class MapsActivity extends FragmentActivity implements
         }
         mMap.setMyLocationEnabled(true);
 
-        if (location.hasLocationEnabled()) {
-            myLocation();
-        }
-
         mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener() {
             @Override
             public boolean onMyLocationButtonClick() {
-                if (!location.hasLocationEnabled()) {
-                    SimpleLocation.openSettings(getApplicationContext());
-                }else {
+                if (location.hasLocationEnabled()) {
                     myLocation();
+                } else {
+                    SimpleLocation.openSettings(getApplicationContext());
                 }
                 return true;
             }
         });
 
+        mMap.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                CameraPosition cameraPosition = mMap.getCameraPosition();
+                LatLng currentCenter = cameraPosition.target;
 
-    }
+                try {
+                    Geocoder geocoder;
+                    
+                    List<Address> addresses;
+                    geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 
-    private void setTextAddress() {
-        Geocoder geocoder;
-        List<Address> addresses;
-        geocoder = new Geocoder(this, Locale.getDefault());
+                    addresses = geocoder.getFromLocation(currentCenter.latitude, currentCenter.longitude, 1);
 
-        try {
-            addresses = geocoder.getFromLocation(location.getLatitude(), location.getLongitude(), 1);
-
-            String address = addresses.get(0).getAddressLine(0);
-            txtAddress.setText(address);
+                    if (addresses.size() > 0){
+                        String address = addresses.get(0).getAddressLine(0);
+                        txtAddress.setText(address);
+                        Log.d("zzz", "\n" + address);
+                    }
 
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void myLocation() {
         LatLng myLocation = new LatLng(location.getLatitude(), location.getLongitude());
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(myLocation, 15));
-
-        setTextAddress();
     }
 
 
@@ -192,11 +195,10 @@ public class MapsActivity extends FragmentActivity implements
                 Place place = Autocomplete.getPlaceFromIntent(data);
                 edtSearchAddress.setText(place.getName());
                 txtAddress.setText(place.getAddress());
-                Log.i(TAG, "Place: " + place.getName() + "\n" + place.getAddress());
 
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(data);
-                Log.i(TAG, "Error: "+status.getStatusMessage());
+                Log.i(TAG, "Error: " + status.getStatusMessage());
 
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.

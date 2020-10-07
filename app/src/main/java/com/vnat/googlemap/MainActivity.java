@@ -38,12 +38,7 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         location = new SimpleLocation(this);
 
-        funGetAddress();
 
-    }
-
-    private void funGetAddress() {
-        Intent intent = getIntent();
     }
 
     @AfterPermissionGranted(RC_LOCATION)
