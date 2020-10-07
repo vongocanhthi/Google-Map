@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -25,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     private SimpleLocation location;
 
     private static final int RC_LOCATION = 369;
+    private static final int RC_ADDRESS = 21;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +38,20 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
 
         location = new SimpleLocation(this);
 
+        funGetAddress();
+
+    }
+
+    private void funGetAddress() {
+        Intent intent = getIntent();
     }
 
     @AfterPermissionGranted(RC_LOCATION)
     private void permission() {
         String[] perms = {Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
         if (EasyPermissions.hasPermissions(this, perms)) {
-            startActivity(new Intent(this, MapsActivity.class));
+            Intent intent = new Intent(this, MapsActivity.class);
+            startActivityForResult(intent, RC_ADDRESS);
 
         } else {
             EasyPermissions.requestPermissions(this, "We need permissions to get the location",
@@ -71,8 +81,13 @@ public class MainActivity extends AppCompatActivity implements EasyPermissions.P
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+//        if (requestCode == AppSettingsDialog.DEFAULT_SETTINGS_REQ_CODE) {
+//
+//        }
 
+        if (requestCode == RC_ADDRESS && resultCode == RESULT_OK){
+            String address = data.getStringExtra("address");
+            txtSetLocation.setText(address);
         }
     }
 

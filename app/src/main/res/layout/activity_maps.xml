@@ -44,8 +44,7 @@
             android:textColor="@drawable/bg_save"
             android:layout_marginLeft="10dp"
             android:paddingEnd="20dp"
-            android:text="Save"
-            android:onClick="Save"/>
+            android:text="Save"/>
 
     </LinearLayout>
 

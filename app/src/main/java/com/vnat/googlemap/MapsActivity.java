@@ -52,6 +52,8 @@ public class MapsActivity extends FragmentActivity implements
     TextView txtAddress;
     @BindView(R.id.edtSearchAddress)
     EditText edtSearchAddress;
+    @BindView(R.id.txtSave)
+    TextView txtSave;
 
     private GoogleMap mMap;
     private SupportMapFragment mapFragment;
@@ -68,6 +70,19 @@ public class MapsActivity extends FragmentActivity implements
 
         init();
         funSearchAddress();
+        funSave();
+    }
+
+    private void funSave() {
+        txtSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent();
+                intent.putExtra("address", txtAddress.getText().toString());
+                setResult(RESULT_OK, intent);
+                finish();
+            }
+        });
     }
 
     private void funSearchAddress() {
@@ -204,7 +219,9 @@ public class MapsActivity extends FragmentActivity implements
 
     }
 
-    public void Save(View view) {
-        Toast.makeText(this, "Save", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        setResult(RESULT_CANCELED);
     }
 }
